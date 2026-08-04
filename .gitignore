@@ -1,0 +1,17 @@
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# secrets
+.env
+.env.*
+*.pem
+*.key
+credentials*
+*token*
+
+# local dumps
+*.log
+assets/private/
