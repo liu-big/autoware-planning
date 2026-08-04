@@ -1,0 +1,55 @@
+# Official CARLA path: ROS 2 Humble + Python 3.10 + CARLA 0.9.15
+# (Jazzy image is Python 3.12 — no compatible carla==0.9.15 wheel)
+services:
+  autoware_carla:
+    # CUDA runtime required (ground_segmentation_cuda etc.)
+    image: ghcr.io/autowarefoundation/autoware:universe-cuda-humble
+    container_name: aw_carla_sim
+    privileged: true
+    runtime: nvidia
+    network_mode: host
+    ipc: host
+    stdin_open: true
+    tty: true
+    working_dir: /home/aw
+    environment:
+      - DISPLAY=${DISPLAY:-:1}
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - HOST_UID=${HOST_UID:-1000}
+      - HOST_GID=${HOST_GID:-1000}
+      - QT_X11_NO_MITSHM=1
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CARLA_HOST=127.0.0.1
+      - CARLA_PORT=2000
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/opt/py310_site
+      - OBJECT_SOURCE=${OBJECT_SOURCE:-dummy}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /mnt/aw_res/autoware/data/maps:/home/aw/autoware_data/maps
+      - /mnt/aw_res/autoware/data/ml_models:/home/aw/autoware_data/ml_models
+      - /mnt/aw_res/autoware/logs:/home/aw/autoware_logs
+      - /mnt/aw_res/cache/pip:/wheels:ro
+      - /mnt/aw_res/cache/py310_site:/opt/py310_site:ro
+      - /mnt/aw_res/docker:/home/aw/aw_docker:ro
+      # Must NOT mount at /home/aw/carla — that shadows the Python `carla` package
+      - /mnt/aw_res/carla:/opt/carla_sim:ro
+      # Planning overrides (avoid-first pedestrian tuning)
+      - /mnt/aw_res/docker/planning_overrides/behavior_path_planner/autoware_behavior_path_static_obstacle_avoidance_module/static_obstacle_avoidance.param.yaml:/opt/autoware/autoware_launch/share/autoware_launch/config/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/autoware_behavior_path_static_obstacle_avoidance_module/static_obstacle_avoidance.param.yaml:ro
+      - /mnt/aw_res/docker/planning_overrides/motion_velocity_planner/obstacle_stop.param.yaml:/opt/autoware/autoware_launch/share/autoware_launch/config/planning/scenario_planning/lane_driving/motion_planning/motion_velocity_planner/obstacle_stop.param.yaml:ro
+      - /mnt/aw_res/docker/planning_overrides/behavior_path_planner/scene_module_manager.param.yaml:/opt/autoware/autoware_launch/share/autoware_launch/config/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/scene_module_manager.param.yaml:ro
+      - /mnt/aw_res/docker/planning_overrides/behavior_path_planner/drivable_area_expansion.param.yaml:/opt/autoware/autoware_launch/share/autoware_launch/config/planning/scenario_planning/lane_driving/behavior_planning/behavior_path_planner/drivable_area_expansion.param.yaml:ro
+      - /mnt/aw_res/docker/planning_overrides/planning_validator/trajectory_checker.param.yaml:/opt/autoware/autoware_launch/share/autoware_launch/config/planning/scenario_planning/common/planning_validator/trajectory_checker.param.yaml:ro
+      # Control overrides (no steer-convergence hold / relaxed gate limits)
+      - /mnt/aw_res/docker/control_overrides/trajectory_follower/longitudinal/pid.param.yaml:/opt/autoware/autoware_launch/share/autoware_launch/config/control/trajectory_follower/longitudinal/pid.param.yaml:ro
+      - /mnt/aw_res/docker/control_overrides/trajectory_follower/lateral/mpc.param.yaml:/opt/autoware/autoware_launch/share/autoware_launch/config/control/trajectory_follower/lateral/mpc.param.yaml:ro
+      - /mnt/aw_res/docker/control_overrides/vehicle_cmd_gate/vehicle_cmd_gate.param.yaml:/opt/autoware/autoware_launch/share/autoware_launch/config/control/vehicle_cmd_gate/vehicle_cmd_gate.param.yaml:ro
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: bash
