@@ -26,6 +26,16 @@ Autoware **决策规划**领域笔记与实验代码。
 
 详细结论见：[`behavior/obstacle-avoidance/README.md`](behavior/obstacle-avoidance/README.md)
 
+### 实验截图
+
+Autonomous 行驶中（Town01，约 7–10 km/h）：
+
+![Town01 Autoware autonomous top-down](docs/images/town01-autonomous-topdown.png)
+
+`static_obstacle_avoidance` 左绕：黄框为障碍，绿色轨迹向左偏出车道中心：
+
+![Town01 static obstacle avoidance left shift](docs/images/town01-static-obstacle-avoidance.png)
+
 ---
 
 ## 快速开始（本机路径）
@@ -119,6 +129,7 @@ autoware-planning/
 │   └── obstacle-avoidance/            # 绕障实验笔记
 ├── motion/                            # 运动规划笔记（obstacle_stop 等）
 ├── docs/
+│   ├── images/                        # 实验截图
 │   └── repo-layout.md                 # 多仓库划分约定
 └── scripts/
     └── carla-town01-avoidance/        # 本次实验脚本与参数
